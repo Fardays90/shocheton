@@ -14,14 +14,19 @@ class ModelPerspective(BaseModel):
     verdict: str = Field(..., description="The isolated evaluation. Must be: Supported, Refuted or Conflicting")
     confidence_score: Optional[int] = Field(default=None, description="Model certainty score from 0 to 100 based on the evidence collection")
     rationale: str = Field(..., description="Logical step by step reasoning justification behind this perspective")
+    cited_sources: List[int] = Field(default_factory=list, description="The specific 2-3 sources indices (1,2,3,...) this agent relies on.")
+class ModelPerspectiveMapped(BaseModel):
+    verdict: str = Field(..., description="The isolated evaluation. Must be: Supported, Refuted or Conflicting")
+    confidence_score: Optional[int] = Field(default=None, description="Model certainty score from 0 to 100 based on the evidence collection")
+    rationale: str = Field(..., description="Logical step by step reasoning justification behind this perspective")
     cited_sources: List[EvidenceSource] = Field(default_factory=list, description="The specific 2-3 sources this agent relies on.")
 
 class AgentState(BaseModel):
     raw_input_text: str = Field(..., description="The raw text block from the user or extracted from pdf.")
     isolated_claim: Optional[str] = Field(default=None, description="The isolated claim extracted from the raw input by the system")
     retrieved_evidence: Annotated[List[EvidenceSource], operator.add] = Field(default_factory=list)
-    agent1_perspective: Optional[ModelPerspective] = Field(default=None)
-    agent2_perspective: Optional[ModelPerspective] = Field(default=None)
+    agent1_perspective: Optional[ModelPerspectiveMapped] = Field(default=None)
+    agent2_perspective: Optional[ModelPerspectiveMapped] = Field(default=None)
     debate_transcript: Annotated[List[Dict[str, str]], operator.add] = Field(default_factory=list)
     final_verdict: Optional[str] = Field(default=None, description="The final system verdict of the user input.")
     final_justification: Optional[str] = Field(default=None, description="Final system logical explanation behind the final verdict.")

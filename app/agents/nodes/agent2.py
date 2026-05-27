@@ -1,10 +1,10 @@
 from langchain_openai import ChatOpenAI
 from app.agents.state import AgentState, ModelPerspective, ModelPerspectiveMapped
 
-async def agent1_node(state: AgentState) -> dict:
+async def agent2_node(state: AgentState) -> dict:
     if not state.isolated_claim:
         return {
-            "agent1_perspective": ModelPerspective(
+            "agent2_perspective": ModelPerspective(
                 verdict="Conflicting",
                 confidence_score=0,
                 rationale="No cited sources found",
@@ -27,19 +27,20 @@ async def agent1_node(state: AgentState) -> dict:
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.4)
     structured_llm = llm.with_structured_output(ModelPerspective)
     system_instruction = (
-        "You are an optimistic, analytical corroboration agent operating inside an adversarial multi-agent system.\n\n"
+        "You are a hyper-skeptical, adversarial cross-examination agent operating inside a multi-agent fact-checking pipeline.\n\n"
         "YOUR CORE MISSION:\n"
         "Analyze the provided 'Isolated Claim' against the collected 'Retrieved Evidence Context'. "
-        "Actively look for alignments, validations, implicit agreements, and direct corroborations that prove the claim is correct. "
-        "Be generous but stay strictly factual—do not invent data out of thin air.\n\n"
+        "Actively look for contradictions, logical gaps, missing context, weak source credibility, or outright counter-evidence that refutes the claim.\n"
+        "Be uncharitable: assume the claim is unverified or false until proven true by flawless, high-credibility proof. "
+        "Do not invent data, but aggressively highlight every flaw, assumption, or omission in the provided sources.\n\n"
         "CRITICAL RULES FOR STRUCTURED OUTPUT:\n"
         "1. For 'verdict', choose strictly from these exact options:\n"
-        "   - 'Supported': If the evidence strongly validates or correlates positively with the claim.\n"
-        "   - 'Refuted': If the evidence directly contradicts, disproves, or denies the claim.\n"
-        "   - 'Conflicting': If some sources agree while others disagree, or if there is entirely insufficient context to verify it.\n"
-        "2. For 'confidence_score', assign an integer from 0 to 100 based on the strength and credibility percentages of the matching sources.\n"
-        "3. For 'rationale', provide a detailed, step-by-step logical breakdown showing how you found supporting connections.\n"
-        "4. For 'cited_sources', filter the 'Retrieved Evidence Context' array down to the top 2-3 specific EvidenceSource objects you heavily relied on to form this perspective.\n"
+        "   - 'Refuted': If the evidence directly contradicts, disproves, or fails to logically sustain the claim.\n"
+        "   - 'Conflicting': If the context contains massive contradictions between sources, or if there is entirely insufficient evidence to support it.\n"
+        "   - 'Supported': ONLY choose this if the evidence is so bulletproof, explicit, and highly credible that it is impossible to argue against.\n"
+        "2. For 'confidence_score', assign an integer from 0 to 100 based on how strongly you feel your cynical assessment holds up against the context.\n"
+        "3. For 'rationale', provide a critical, step-by-step uncharitable logical breakdown exposing the weaknesses, gaps, or outright falsities of the claim based on the sources.\n"
+        "4. For 'cited_sources', return an array of integers representing the Source IDs (e.g., [1, 2]) that directly expose the claim's flaws or contain contradictory information."
     )
     user_input = (
         f"Isolated claim to investigate: {state.isolated_claim}\n\n"
@@ -61,4 +62,4 @@ async def agent1_node(state: AgentState) -> dict:
         rationale=resp.rationale,
         cited_sources = cited_sources_chosen
     )
-    return {"agent1_perspective": structured_response}
+    return {"agent2_perspective": structured_response}
