@@ -1,7 +1,7 @@
 from tavily import AsyncTavilyClient #type: ignore
 from app.agents.state import AgentState, EvidenceSource
 
-async def parallel_retriever_node(state: AgentState) -> dict:
+async def web_search_node(state: AgentState) -> dict:
     if not state.isolated_claim:
         return {
             "retrieved_evidence": []
