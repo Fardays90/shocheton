@@ -20,7 +20,7 @@ async def web_search_node(state: AgentState) -> dict:
         source = EvidenceSource(
             title= raw.get("title", "Untitled Source"),
             url = raw.get("url"),
-            origin="Web Search",
+            origin="General Web Search",
             credibility_percentage=calculated_cred,
             extracted_snippet=raw.get("content","").strip()
             )
