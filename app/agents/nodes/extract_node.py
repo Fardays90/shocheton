@@ -1,9 +1,10 @@
 from langchain_openai import ChatOpenAI # type: ignore
 from pydantic import BaseModel, Field
-from app.agents.state import AgentState
+from app.agents.state import AgentState, claim_category
 
 class ClaimExtraction(BaseModel):
     extracted_claim: str = Field(..., description="Clean, atomic, factual claim stripped of conversational filler")
+    category: claim_category = Field(..., description="Category of the claim. It MUST match one of the specified enum values strictly.")
 
 async def extract_claim_node(state: AgentState) -> dict:
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
@@ -14,7 +15,7 @@ async def extract_claim_node(state: AgentState) -> dict:
         "that requires cross-examination and external verification.\n\n"
         "CRITICAL INSTRUCTIONS:\n"
         "1. Strip away all conversational filler, emotional rhetoric, and meta-commentary.\n"
-        "2. If the input contains a 'USER VERIFICATION TARGET' and 'PDF SOURCE CONTEXT', focus strictly on "
+        "2. If the input contains a 'PDF SOURCE CONTEXT', focus strictly on "
         "the core assertion the user wants verified, using the PDF context to resolve any pronouns or vague terms.\n"
         "3. Ensure the output is a single, standalone declarative sentence. It must contain complete context "
         "and proper nouns so that an external search engine can process it cleanly without context clues "
@@ -24,7 +25,8 @@ async def extract_claim_node(state: AgentState) -> dict:
     prompt = [{"role": "system", "content": system_prompt}, {"role": "user", "content": state.raw_input_text}]
     result = await structured_llm.ainvoke(prompt)
     return {
-        "isolated_claim": result.extracted_claim
+        "isolated_claim": result.extracted_claim,
+        "category": result.category
     }
 
 
