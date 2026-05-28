@@ -8,6 +8,7 @@ from app.agents.nodes.agent1 import agent1_node
 from app.agents.nodes.agent2 import agent2_node
 from app.agents.nodes.debate_node import debate_node
 from app.agents.nodes.moderator import moderator_node
+from app.agents.nodes.barrier_node import barrier_node
 
 def compile_workflow():
     workflow = StateGraph(AgentState)
@@ -18,17 +19,19 @@ def compile_workflow():
     workflow.add_node("agent2_skeptic", agent2_node)
     workflow.add_node("debate_room", debate_node)
     workflow.add_node("supreme_moderator", moderator_node)
+    workflow.add_node("barrier_node", barrier_node)
 
     workflow.set_entry_point("extract_claim")
 
     workflow.add_edge("extract_claim", "web_search")
     workflow.add_edge("extract_claim", "db_search")
 
-    workflow.add_edge("web_search", "agent1_optimist")
-    workflow.add_edge("web_search", "agent2_skeptic")
-    workflow.add_edge("db_search", "agent1_optimist")
-    workflow.add_edge("db_search", "agent2_skeptic")
+    workflow.add_edge("web_search", "barrier_node")
+    workflow.add_edge("db_search", "barrier_node")
 
+    workflow.add_edge("barrier_node", "agent1_optimist")
+    workflow.add_edge("barrier_node", "agent2_skeptic")
+    
     workflow.add_edge("agent1_optimist", "debate_room")
     workflow.add_edge("agent2_skeptic", "debate_room")
 
