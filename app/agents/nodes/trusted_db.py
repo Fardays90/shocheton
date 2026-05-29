@@ -15,13 +15,14 @@ async def trusted_db_node(state: AgentState) -> dict:
         return collection.get(
             where={"category": state.category.value}
         )
+    tavily_api_key = os.getenv("TAVILY_KEY")
     lookup_results = await asyncio.to_thread(sync_lookup)
     domains = lookup_results.get("documents", []) if lookup_results else []
     query_string = state.isolated_claim
     if domains:
         site_filters = " OR ".join([f"site:{d}" for d in domains])
         query_string = f"{state.isolated_claim} ({site_filters})"
-    tavily_client = AsyncTavilyClient()
+    tavily_client = AsyncTavilyClient(api_key=tavily_api_key)
     try:
         response = await tavily_client.search(
             query=query_string,
@@ -34,7 +35,7 @@ async def trusted_db_node(state: AgentState) -> dict:
                 EvidenceSource(
                     title=result.get("title", "Verified Source Document"),
                     url=result.get("url", ""),
-                    origin=f"Trusted db Scoped Search ({state.category.value})",
+                    origin=f"Trusted db Scoped Search",
                     credibility_percentage=90 if domains else 70,
                     extracted_snippet=result.get("content", "")
                 )

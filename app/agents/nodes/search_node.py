@@ -1,3 +1,4 @@
+import os
 from tavily import AsyncTavilyClient #type: ignore
 from app.agents.state import AgentState, EvidenceSource
 
@@ -6,7 +7,8 @@ async def web_search_node(state: AgentState) -> dict:
         return {
             "retrieved_evidence": []
         }
-    tavily_client = AsyncTavilyClient()
+    api_key = os.getenv("TAVILY_KEY")
+    tavily_client = AsyncTavilyClient(api_key=api_key)
     response = await tavily_client.search(
         query=state.isolated_claim,
         search_depth='advanced',

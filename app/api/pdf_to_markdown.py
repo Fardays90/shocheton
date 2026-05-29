@@ -1,6 +1,7 @@
 import pymupdf
 import pymupdf4llm
 import tiktoken
+import base64
 
 def get_tokens(text:str) -> list[int]:
     model = "gpt-4o-mini"
@@ -32,8 +33,15 @@ def truncate(text:str) -> str:
     final_str = "First part: \n" + first_str + "\n Second Part: \n" + second_str
     return final_str
 
-def pdf_to_md(file_bytes: bytes) -> str:
-    doc = pymupdf.open(stream= file_bytes, filetype="pdf")
-    md = pymupdf4llm.to_markdown(doc)
-    slimmed = truncate(md)
-    return slimmed
+def pdf_to_md(base64_str: str) -> str:
+    try:
+        if "," in base64_str:
+            base64_str = base64_str.split(",")[1]
+        file_bytes = base64.b64decode(base64_str)
+        doc = pymupdf.open(stream= file_bytes, filetype="pdf")
+        md = pymupdf4llm.to_markdown(doc)
+        slimmed = truncate(md)
+        return slimmed
+    except Exception as e:
+        print(f"Error while parsing pdf ${e}")
+        return ""

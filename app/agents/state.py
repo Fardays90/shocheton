@@ -1,6 +1,6 @@
 import operator
 from enum import Enum
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict
 from typing_extensions import Annotated
 from pydantic import BaseModel, Field
 
@@ -13,7 +13,7 @@ class claim_category(str, Enum):
 class EvidenceSource(BaseModel):
     title: str = Field(..., description="The title of the webpage, article, or document section.")
     url: Optional[str] = Field(default=None, description="The direct web url of the source if retrieved from the live web search.")
-    origin: Optional[str] = Field(default=None, description="Must be explicitly labeled as either 'Web Search' or 'Trusted KB'.")
+    origin: Optional[str] = Field(default=None, description="Must be explicitly labeled as either 'General Web Search' or 'Trusted db Scoped Search'.")
     credibility_percentage: int = Field(..., description="The evaluated domain credibility score from 0 to 100")
     extracted_snippet: str = Field(..., description="The raw semantic sentence or proof block utilized by the models")
 
@@ -39,8 +39,8 @@ class AgentState(BaseModel):
     final_verdict: Optional[str] = Field(default=None, description="The final system verdict of the user input.")
     final_justification: Optional[str] = Field(default=None, description="Final system logical explanation behind the final verdict.")
     system_confidence: int = Field(default=0, description="Overall system confidence score from 0 to 100")
-    final_top_sources: List[EvidenceSource] = Field(..., "The top sources used for the justification")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Execution times, token usage, and system stats")
+    final_top_sources: List[EvidenceSource] = Field(default_factory=list, description="The top sources used for the justification")
+    # metadata: Dict[str, Any] = Field(default_factory=dict, description="Execution times, token usage, and system stats")
 class FinalVerificationState(BaseModel):
     final_verdict: str = Field(..., description="The final evaluation outcome, Must be either 'Supported', 'Refuted', 'Conflicting'")
     final_justification: str=  Field(..., description="The final step by step logical justification as to why the final verdict was chosen.")

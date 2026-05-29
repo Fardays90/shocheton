@@ -1,4 +1,4 @@
-from app.agents.state import EvidenceSource, AgentState, FinalVerificationState, FinalState
+from app.agents.state import AgentState, FinalVerificationState
 from langchain_openai import ChatOpenAI
 
 async def moderator_node(state: AgentState) -> dict:
@@ -45,6 +45,7 @@ async def moderator_node(state: AgentState) -> dict:
         "CRITICAL CITATION RULES:\n"
         "- Base your decision strictly on the provided 'RAW UPSTREAM EVIDENCE SNIPPETS'.\n"
         "- In your 'final_justification', explicitly reference statements using source brackets like [Source 1] or [Source 2].\n"
+        "- your final_verdict must be only either one of these 3 options 'Supported', 'Refuted' or 'Conflicting' "
         "- In your 'top_sources' ONLY make a list of integers corresponding to the evidence number as sent in the original user prompt (1,2,...)"
         "- Ensure indices are mathematically valid: if there are 4 sources, values must be between 1 and 4. Never invent source numbers."
         "- In your 'system_confidence' generate a confidence score of the final justification and verdict an integer between 0 and 100"
@@ -60,7 +61,7 @@ async def moderator_node(state: AgentState) -> dict:
         f"Rationale: {state.agent2_perspective.rationale if state.agent2_perspective else 'N/A'}\n\n"
         f"### 5. TARGETED REBUTTAL TRANSCRIPT ###\n{debate_transcript_str}"
     )
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
     structured_llm = llm.with_structured_output(FinalVerificationState)
     prompt = [{"role": "system", "content": system_instruction}, {"role": "user", "content": case_file_payload}]
     response = await structured_llm.ainvoke(prompt)

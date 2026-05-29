@@ -1,11 +1,26 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from typing import Optional
-from fastapi import APIRouter, HTTPException, status, FastAPI
+from fastapi import HTTPException, status, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from pdf_to_markdown import pdf_to_md
-from app.agents.nodes.langgraph import verification_graph
+from .pdf_to_markdown import pdf_to_md
+from app.agents.nodes.graph_engine import verification_graph
 
+root_dir = Path(__file__).resolve().parents[2]
+env = root_dir / ".env"
+load_dotenv(dotenv_path=env)
+if not os.getenv("OPENAI_API_KEY") or not os.getenv("TAVILY_KEY"):
+    print("keys not found")
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class RequestPayload(BaseModel):
     text_input: str = Field(
         ...,
