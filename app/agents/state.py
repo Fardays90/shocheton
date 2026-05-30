@@ -1,6 +1,6 @@
 import operator
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from typing_extensions import Annotated
 from pydantic import BaseModel, Field
 
@@ -40,7 +40,7 @@ class AgentState(BaseModel):
     final_justification: Optional[str] = Field(default=None, description="Final system logical explanation behind the final verdict.")
     system_confidence: int = Field(default=0, description="Overall system confidence score from 0 to 100")
     final_top_sources: List[EvidenceSource] = Field(default_factory=list, description="The top sources used for the justification")
-    # metadata: Dict[str, Any] = Field(default_factory=dict, description="Execution times, token usage, and system stats")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Execution times, token usage, and system stats")
 class FinalVerificationState(BaseModel):
     final_verdict: str = Field(..., description="The final evaluation outcome, Must be either 'Supported', 'Refuted', 'Conflicting'")
     final_justification: str=  Field(..., description="The final step by step logical justification as to why the final verdict was chosen.")
